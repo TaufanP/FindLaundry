@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   CheckBox,
-  Alert
+  Alert,
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 
@@ -18,7 +18,13 @@ class Regist extends React.Component {
     this.state = {
       checked: false,
       image: null,
-      completeName: '',
+      name: '',
+      username: '',
+      password: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
+      msg: ''
     };
   }
 
@@ -57,23 +63,76 @@ class Regist extends React.Component {
     });
   };
 
-  regexTest = () => {
+  iterateRegex = () => {
+    // Alert.alert(
+    //   'Error',
+    //   this.state.formData[0].length,
+    //   [{text: 'GOT IT'},{text: 'TEU'}],
+    //   {cancelable: true},
+    // );
+    const {name, username, password, email, phoneNumber} = this.state
     const nameRegex = /[0-9]/;
-    if (nameRegex.test(this.state.completeName)) {
-      alert('bisa regex');
-    } else {
-      alert('ga kena regex');
+    const usernameRegex = /\s/;
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const phoneRegex = /08\d/;
+    if(nameRegex.test(name)){
+      this.setState({msg: 'Name only contains Alphabet!'})
     }
-  };
+    else if(usernameRegex.test(username)){
+      this.setState({msg: 'Username cannot contain space!'})
+    }
+    else if(password.length !== 0 && (password.length < 8 || password.length > 12)){
+      this.setState({msg: 'Password length is 8 - 12 characters!'})
+    }
+    else if(email !== '' && !emailRegex.test(email)){
+      this.setState({msg: 'Please enter an valid email!'})
+    }
+    else if(phoneNumber !== '' && !phoneRegex.test(phoneNumber)){
+      this.setState({msg: 'Phone number format is 08xxxxxxxxxx'})
+    }
+    else{this.setState({msg: ''})}
+  }
 
-  alertTest = () => {
-    // alert('bisa alert');
-    Alert.alert(
-      '',
-      'Name cannot contain number!',
-      [{text: 'GOT IT'},{text: 'TEU'}],
-      {cancelable: false}
-    )
+  regexTest = key => {
+    const {name, username, password, email, phoneNumber} = this.state;
+    switch (key) {
+      case 'completeName':
+        const nameRegex = /[0-9]/;
+        if (nameRegex.test(name)) {
+          return [styles.textInput, styles.regexCatch];
+        } else {
+          return [styles.textInput];
+        }
+      case 'username':
+        const usernameRegex = /\s/;
+        if (usernameRegex.test(username)) {
+          return [styles.textInput, styles.regexCatch];
+        } else {
+          return [styles.textInput];
+        }
+      case 'password':
+        if (password.length !== 0 && (password.length < 8 || password.length > 12)) {
+          return [styles.textInput, styles.regexCatch];
+        } else {
+          return [styles.textInput];
+        }
+        case 'email':
+          const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+          if (email !== '' && !emailRegex.test(email)) {
+            return [styles.textInput, styles.regexCatch];
+          } else {
+            return [styles.textInput];
+          }
+        case 'phoneNumber':
+          const phoneRegex = /08\d/;
+          if (phoneNumber !== '' && !phoneRegex.test(phoneNumber)) {
+            return [styles.textInput, styles.regexCatch];
+          } else {
+            return [styles.textInput];
+          }
+      default:
+        null;
+    }
   };
 
   render() {
@@ -93,48 +152,49 @@ class Regist extends React.Component {
           <View style={styles.lilContainer}>
             <View style={styles.inputContainer}>
               <TextInput
-                style={[styles.textInput, styles.regexCatch]}
+                style={this.regexTest('completeName')}
                 placeholder="Complete Name"
-                onChangeText={completeName => this.setState({completeName})}
-              />              
-              <View style={styles.alertButton}>
-                <TouchableOpacity onPress={() => this.alertTest()}>
-                <View style = {{backgroundColor: values.fail, width:24, height:24,borderRadius: 100, justifyContent: 'center', alignItems:'center'}}>
-                  <Text style={{color: values.light, fontWeight: 'bold'}}>
-                    i
-                  </Text>
-                </View>
-                </TouchableOpacity>
-              </View>
+                onChangeText={name => this.setState({name})}
+              />
             </View>
             <View style={styles.inputContainer}>
-              <TextInput style={styles.textInput} placeholder="Username" />
+              <TextInput
+                style={this.regexTest('username')}
+                placeholder="Username"
+                onChangeText={username => this.setState({username})}
+              />
             </View>
             <View style={styles.inputContainer}>
               <TextInput
                 secureTextEntry={true}
-                style={styles.textInput}
+                style={this.regexTest('password')}
                 placeholder="Password"
+                onChangeText={password => this.setState({password})}
               />
             </View>
             <View style={styles.inputContainer}>
               <TextInput
-                style={styles.textInput}
+                style={this.regexTest('email')}
                 placeholder="Email"
                 keyboardType={'email-address'}
+                onChangeText={email => this.setState({email})}
               />
             </View>
             <View style={styles.inputContainer}>
               <TextInput
-                style={styles.textInput}
+                style={this.regexTest('phoneNumber')}
                 placeholder="Phone Number"
                 keyboardType={'number-pad'}
+                onChangeText={phoneNumber => this.setState({phoneNumber})}
               />
             </View>
             <View style={styles.inputContainer}>
               <TextInput style={styles.textInput} placeholder="Address" />
             </View>
-            <View style={styles.wrapper}>
+            <View style = {{alignItems: 'center', marginTop: 8}}>
+              <Text style = {{color:values.fail}}>{this.state.msg}</Text>
+            </View>
+            {/* <View style={styles.wrapper}>
               <View style={styles.pictCont}>
                 <TouchableOpacity
                   onPress={() => {
@@ -154,9 +214,9 @@ class Regist extends React.Component {
                   />
                 </View>
               </View>
-            </View>
+            </View> */}
             <View style={styles.signInButtonCont}>
-              <TouchableOpacity onPress={() => this.regexTest()}>
+              <TouchableOpacity onPress={() => this.iterateRegex()}>
                 <View style={styles.signInButton}>
                   <Text
                     style={{
